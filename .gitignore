@@ -216,3 +216,4 @@ buildNumber.properties
 
 
 *.prop
+TourDeFrance/src/main/java/com/revature/TourDeFrance/service/DBConfig.java
