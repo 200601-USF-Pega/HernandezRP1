@@ -7,34 +7,43 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.revature.TourDeFranceShop.model.Bike;
+
 //import org.apache.logging.log4j.LogManager;
 //import org.apache.logging.log4j.Logger;
 
 import com.revature.TourDeFranceShop.model.Bill;
+import com.revature.TourDeFranceShop.model.Product;
 import com.revature.TourDeFranceShop.service.ConnectionService;
 
 public class EmployeeDB {
-	//private static final Logger logger = LogManager.getLogger(EmployeeDB.class);
+	private static final Logger logger = LogManager.getLogger(EmployeeDB.class);
 
 	// Methods that retrieve data from DB
-	public List<String> getRepairList() {
-		List<String> repairList = new ArrayList<>();
+	public List<Bike> getRepairList() {
+		List<Bike> repairList = new ArrayList<>();
 		try {
 			Statement s = ConnectionService.dbConnect().createStatement();
 			s.executeQuery("SELECT repairid, bikeid, status FROM public.repair;");
 			ResultSet results = s.getResultSet();
 			while (results.next()) {
-				repairList.add(results.getString("repairid"));
-				repairList.add(results.getString("bikeid"));
-				repairList.add(results.getString("status"));
+				Bike bike = new Bike();
+				bike.setRepairId(results.getInt("repairid"));
+				bike.setBikeId(results.getInt("bikeid"));
+				bike.setStatus(results.getString("status"));
+
+				repairList.add(bike);
 			}
 		} catch (SQLException e) {
-			//logger.error("Exception: " + e.getMessage());
+			logger.error("Exception: " + e.getMessage());
 		}
 		return repairList;
 	}
 
-	public List<Bill> getBill() {
+	public List<Bill> getBillList() {
 		List<Bill> statements = new ArrayList<>();
 		try {
 			Statement s = ConnectionService.dbConnect().createStatement();
@@ -46,37 +55,56 @@ public class EmployeeDB {
 				bill.setBalance(results.getDouble("balance"));
 				bill.setStatus(results.getString("status"));
 				bill.setBikeId(results.getInt("bikeid"));
-				
+
 				statements.add(bill);
 			}
 
 		} catch (SQLException e) {
-			//logger.error("Exception: " + e.getMessage());
+			logger.error("Exception: " + e.getMessage());
 		}
 		return statements;
 	}
 
-	public List<String> getProductList() {
-		List<String> products = new ArrayList<>();
+	public List<Product> getProductList() {
+		List<Product> productList = new ArrayList<>();
 		try {
 			Statement s = ConnectionService.dbConnect().createStatement();
 			s.executeQuery("SELECT * FROM public.products;");
 			ResultSet results = s.getResultSet();
 			while (results.next()) {
-				products.add(results.getString("pid"));
-				products.add(results.getString("name"));
-				products.add(results.getString("price"));
-				products.add(results.getString("description"));
-				products.add(results.getString("status"));
+				Product product = new Product();
+				product.setProductId(results.getInt("pid"));
+				product.setName(results.getString("name"));
+				product.setPrice(results.getDouble("price"));
+				product.setDesc(results.getString("description"));
+				product.setStatus(results.getString("status"));
+
+				productList.add(product);
 			}
 		} catch (SQLException e) {
-			//logger.error("Exception: " + e.getMessage());
+			logger.error("Exception: " + e.getMessage());
 		}
-		return products;
+		return productList;
+	}
+	
+	//Methods that remove data from DB
+	public void removeRepairEntry(Bike bike) {
+		int repairId = bike.getRepairId();
+		try {
+			Statement s = ConnectionService.dbConnect().createStatement();
+			s.executeQuery("DELETE FROM public.repair WHERE repairid =" + repairId+";");
+		} catch (SQLException e) {
+			logger.error("Exception: " + e.getMessage());
+		}
+		
 	}
 
 	// Methods that insert data to DB
-	public void insertBalance(int customerId, int bikeId, double balance) {
+	public void insertBalance(Bill bill) {
+		int customerId = bill.getUserId();
+		int bikeId = bill.getBikeId();
+		double balance = bill.getBalance();
+
 		try {
 			PreparedStatement s = ConnectionService.dbConnect()
 					.prepareStatement("INSERT INTO public.bills (balance, status, uid, bikeid)" + "VALUES (?,?,?,?);");
@@ -86,11 +114,14 @@ public class EmployeeDB {
 			s.setInt(4, bikeId);
 			s.executeUpdate();
 		} catch (SQLException e) {
-			//logger.error("Exception: " + e.getMessage());
+			logger.error("Exception: " + e.getMessage());
 		}
 	}
 
-	public void insertProduct(String name, double price, String desc) {
+	public void insertProduct(Product product) {
+		String name = product.getName();
+		double price = product.getPrice();
+		String desc = product.getDesc();
 		try {
 			PreparedStatement s = ConnectionService.dbConnect().prepareStatement(
 					"INSERT INTO public.products (name, price, description, status)" + "VALUES (?,?,?,?);");
@@ -100,39 +131,59 @@ public class EmployeeDB {
 			s.setString(4, "in stock");
 			s.executeUpdate();
 		} catch (SQLException e) {
-			//logger.error("Exception: " + e.getMessage());
+			logger.error("Exception: " + e.getMessage());
 		}
 	}
 
 	// Methods that update data in DB
-	public void updateRepairStatus(int repairId, String status) {
+	public void updateRepairStatus(Bike bike) {
+		int repairId = bike.getRepairId();
+		String status = bike.getStatus();
 		try {
 			PreparedStatement s = ConnectionService.dbConnect().prepareStatement(
 					"UPDATE public.repair SET status='" + status + "'" + "WHERE repairid=" + repairId);
 			s.executeUpdate();
 		} catch (SQLException e) {
-			//logger.error("Exception: " + e.getMessage());
+			logger.error("Exception: " + e.getMessage());
 		}
 	}
 
-	public void updateBillStatus(int billId, String status) {
+	public void updateBillStatus(Bill bill) {
+		int billId = bill.getBillId();
+		String status = bill.getStatus();
 		try {
 			PreparedStatement s = ConnectionService.dbConnect()
 					.prepareStatement("UPDATE public.bills SET status='" + status + "'" + "WHERE billid=" + billId);
 			s.executeUpdate();
 		} catch (SQLException e) {
-			//logger.error("Exception: " + e.getMessage());
+			logger.error("Exception: " + e.getMessage());
 		}
 	}
 
-	public void updateProductStatus(int productId, String status) {
-		try {
-			PreparedStatement s = ConnectionService.dbConnect()
-					.prepareStatement("UPDATE public.products SET status='" + status + "'" + "WHERE pid=" + productId);
-			s.executeUpdate();
-		} catch (SQLException e) {
-			//logger.error("Exception: " + e.getMessage());
+	public void updateProduct(Product product) {
+		int productId = product.getProductId();
+		String status = product.getStatus();
+		double price = product.getPrice();
+		if (status != "" && price > 0) {
+			try {
+				PreparedStatement s = ConnectionService.dbConnect().prepareStatement(
+						"UPDATE public.products SET status='" + status + "', price='"+ price + "' WHERE pid=" + productId);
+				s.executeUpdate();
+			} catch (SQLException e) {
+				logger.error("Exception: " + e.getMessage());
+			}
+		} else if (status != "") {
+			try {
+				PreparedStatement s = ConnectionService.dbConnect().prepareStatement(
+						"UPDATE public.products SET status='" + status + "'" + "WHERE pid=" + productId);
+				s.executeUpdate();
+			} catch (SQLException e) {
+				logger.error("Exception: " + e.getMessage());
+			}
+		} else {
+			updateProductPrice(productId, price);
 		}
+
 	}
 
 	public void updateProductPrice(int productId, double price) {
@@ -141,12 +192,12 @@ public class EmployeeDB {
 					.prepareStatement("UPDATE public.products SET price='" + price + "'" + "WHERE pid=" + productId);
 			s.executeUpdate();
 		} catch (SQLException e) {
-			//logger.error("Exception: " + e.getMessage());
+			logger.error("Exception: " + e.getMessage());
 		}
 	}
 
 	// Logout
 	public void logout() {
-		//logger.info("Employee logged out");
+		logger.info("Employee logged out");
 	}
 }
