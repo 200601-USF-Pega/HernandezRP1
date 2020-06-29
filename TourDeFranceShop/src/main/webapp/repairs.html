@@ -5,7 +5,25 @@
 	<meta charset="UTF-8">
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
 		integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script>
+		$(document).ready(function () {
+			if (sessionStorage.getItem("role") == "customer") {
+				let script = document.getElementById("scriptLoad");
+				script.setAttribute("src", "customerFunc.js");
+				document.getElementById("changeBtn").style.visibility = "hidden";
+				document.getElementById("removeBtn").style.visibility = "hidden";
+				
+			} else {
+				let script = document.getElementById("scriptLoad");
+				script.setAttribute("src", "employeeFunc.js");
+				document.getElementById("registerLink").style.visibility = "hidden";
+			}
+		});
 
+	</script>
+	<script src="signin.js"></script>
+	<script id="scriptLoad"></script>
 	<title>Repairs</title>
 </head>
 
@@ -16,7 +34,7 @@
 	<!-- Navbar -->
 	<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
 		<!-- Brand name -->
-		<a class="navbar-brand" href="index.html"><img src="/TourDeFrance/bikeLogo.png" style="width:40px;"></a>
+		<a class="navbar-brand" href="index.html"><img src="bikeLogo.png"  style="width:40px;"></a>
 		<!-- Links -->
 		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#menuCollapse"
 			aria-controls="menuCollapse" aria-expanded="false" aria-label="Toggle navigation">
@@ -29,7 +47,7 @@
 				<li class="nav-item dropdown">
 					<a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">Bikes</a>
 					<div class="dropdown-menu">
-						<a class="dropdown-item" href="register.html">Register</a>
+						<a class="dropdown-item" id="registerLink" href="register.html">Register</a>
 						<a class="dropdown-item" href="repairs.html">Repairs</a>
 					</div>
 				</li>
@@ -44,7 +62,8 @@
 		</div>
 	</nav>
 	<!-- Modal -->
-	<div class="modal fade justify-content-center" id="signin" tabindex="-1" role="dialog" aria-labelledby="signinTitle" aria-hidden="true">
+	<div class="modal fade justify-content-center" id="signin" tabindex="-1" role="dialog" aria-labelledby="signinTitle"
+		aria-hidden="true">
 		<div class="modal-dialog modal-dialog-centered" role="document">
 			<div class="modal-content justify-content-center">
 				<div class="modal-header">
@@ -53,11 +72,12 @@
 						<span aria-hidden="true">&times;</span>
 					</button>
 				</div>
-				<form class="form-signin needs-validation" novalidate>
+				<form class="form-signin needs-validation" action="" novalidate>
 					<div class="modal-body ">
 						<div class="form-row justify-content-center">
 							<div class="form-label-group col-md-6">
-								<input type="text" class="form-control" id="username" placeholder="Username" required autofocus>
+								<input type="text" class="form-control" id="username" placeholder="Username" required
+									autofocus>
 								<div class="valid-feedback"></div>
 								<div class="invalid-feedback">Please fill out this field.</div>
 							</div>
@@ -65,14 +85,15 @@
 						<br>
 						<div class="form-row justify-content-center">
 							<div class="form-label-group col-md-6">
-								<input type="password" class="form-control" id="password" placeholder="Password" required>
+								<input type="password" class="form-control" id="password" placeholder="Password"
+									required>
 								<div class="valid-feedback"></div>
 								<div class="invalid-feedback">Please fill out this field.</div>
 							</div>
 						</div>
 					</div>
 					<div class="modal-footer justify-content-center">
-						<button type="submit" class="btn btn-primary">Signin</button>
+						<input type="button" onclick="signin()" class="btn btn-primary" value="Signin" />
 					</div>
 				</form>
 
@@ -84,70 +105,61 @@
 		<h1>Repairs</h1>
 		<p>Bike repair status view.</p>
 
-		<table class="table table-striped table-hover">
+		<table class="table table-striped table-hover" id="repairTable">
 			<thead class="bg-primary text-white">
 				<tr>
-					<th scope="col">#</th>
 					<th scope="col">Repair ID</th>
 					<th scope="col">Bike ID</th>
 					<th scope="col">Status</th>
 				</tr>
 			</thead>
-			<tbody>
-				<tr>
-					<th scope="row">1</th>
-					<td>dummy</td>
-					<td>dummy</td>
-					<td>dummy</td>
-
-				</tr>
-				<tr>
-					<th scope="row">2</th>
-					<td>dummy</td>
-					<td>dummy</td>
-					<td>dummy</td>
-
-				</tr>
-				<tr>
-					<th scope="row">3</th>
-					<td>dummy</td>
-					<td>dummy</td>
-					<td>dummy</td>
-				</tr>
+			<tbody id="repairTableBody">
 			</tbody>
 		</table>
 		<div>
 			<br>
-			<button class="btn btn-dark" data-toggle="collapse" data-target="#changeRepairStatus">Change Status</button>
+			<button id="changeBtn" class="btn btn-dark" data-toggle="collapse" data-target="#changeRepairStatus">Change Status</button>
+			<button id="removeBtn" class="btn btn-dark" data-toggle="collapse" data-target="#removeRepair">Remove Repair Entry</button>
 		</div>
 		<br />
 		<div id="changeRepairStatus" class="collapse">
-			<form class="needs-validation" novalidate>
+			<form class="needs-validation" id="changeRepairStatus" action="" novalidate>
 				<div class="form-row">
 					<div class="form-group col-md-6">
 						<label for="repairId">Repair ID</label>
-						<input type="text" class="form-control" placeholder="ex. 2" required>
+						<input type="number" id="repairId" class="form-control" placeholder="ex. 2" required>
 						<div class="valid-feedback"></div>
 						<div class="invalid-feedback">Please fill out this field.</div>
 					</div>
 					<div class="form-group col-md-6">
 						<label for="repairStatus">Status</label>
-						<input type="text" class="form-control" placeholder="ex. Complete, In Progress, Waiting"
-							required>
+						<input type="text" id="status" class="form-control"
+							placeholder="ex. Complete, In Progress, Waiting" required>
 						<div class="valid-feedback"></div>
 						<div class="invalid-feedback">Please fill out this field.</div>
 					</div>
 				</div>
 				<br>
-				<button type="submit" class="btn btn-danger">Pay Bill</button>
+				<button type="submit" onclick="postEditRepair()" class="btn btn-danger">Change Status</button>
+			</form>
+		</div>
+		<div id="removeRepair" class="collapse">
+			<form class="form-inline needs-validation" action="" id="bikeRegisterForm" novalidate>
+				<div class="form=group mb-2">
+					<label for="repairIdInput">Enter Repair Id</label>
+				</div>
+				<div class="form=group mb-2 mx-sm-3">
+					<input type="number" id="repairIdInput" class="form-control" placeholder="ex. 2" required>
+					<div class="valid-feedback"></div>
+					<div class="invalid-feedback">Please fill out this field.</div>
+				</div>
+				<button type="submit" onclick="deleteRepairEntry()" class="btn btn-danger mb-2">Remove Entry</button>
 			</form>
 		</div>
 
 	</div>
 
-	<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
-		integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
-		crossorigin="anonymous"></script>
+
 	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
 		integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
 		crossorigin="anonymous"></script>
@@ -155,6 +167,7 @@
 		integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
 		crossorigin="anonymous"></script>
 	<script src="formInput.js"></script>
+
 </body>
 
 </html>
