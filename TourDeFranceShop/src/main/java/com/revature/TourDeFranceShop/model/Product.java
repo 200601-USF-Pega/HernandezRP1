@@ -3,6 +3,8 @@ package com.revature.TourDeFranceShop.model;
 public class Product {
 	private String name;
 	private String desc;
+	private String status;
+	
 	private double price;
 	private int productId;
 
@@ -31,9 +33,16 @@ public class Product {
 	public void setProductId(int productId) {
 		this.productId = productId;
 	}
-	
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
 	@Override
 	public String toString() {
-		return "Product [name=" + name + ", desc=" + desc + ", price=" + price + ", productId=" + productId + "]";
+		return "Product [name=" + name + ", desc=" + desc + ", status=" + status + ", price=" + price + ", productId="
+				+ productId + "]";
 	}
 }
